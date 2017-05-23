@@ -1,0 +1,23 @@
+EXEC = count-matrix-transformer
+
+CXX = g++
+CFLAGS = -Wall -Wextra -O3 -march=native -fopenmp
+BOOST_LIBS = -lboost_program_options -lboost_filesystem -lboost_system
+LDFLAGS = $(BOOST_LIBS) -fopenmp -static
+DEFS = -D__APP_VERSION__="\"`git rev-parse --short=12 HEAD`\""
+
+SRC = $(wildcard *.cc)
+OBJECTS = $(patsubst %.cc, %.o, $(SRC))
+
+.PHONY : clean
+
+all: $(EXEC)
+
+$(EXEC): $(OBJECTS)
+	$(CXX) $^ -o $@ $(LDFLAGS)
+
+%.o: %.cc
+	$(CXX) $(CFLAGS) $(DEFS) -c $< -o $@
+
+clean:
+	rm -f $(EXEC) *.o
