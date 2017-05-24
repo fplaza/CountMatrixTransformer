@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
         const Settings& settings = Settings::parse(argc, argv);
         std::cout << settings << std::endl;
 
-        const ExecutionDescription execution_description(argc, argv);
+        const ExecutionDescription execution_description(settings);
 
         std::auto_ptr<CountMatrixTransformer> count_matrix_transformer =
             CountMatrixTransformerFactory::create_transformer(settings.transformation.type, settings.transformation.min_non_null);

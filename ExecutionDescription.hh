@@ -6,6 +6,7 @@
 #define EXECUTION_DESCRIPTION_HH
 
 #include <string>
+#include "Settings.hh"
 
 struct ExecutionDescription
 {
@@ -16,7 +17,7 @@ struct ExecutionDescription
     const std::string cmd;
     const std::string program_version;
 
-    ExecutionDescription(const int argc, char* const argv[]);
+    ExecutionDescription(const Settings& settings);
 };
 
 #endif // EXECUTION_DESCRIPTION_HH

@@ -41,25 +41,27 @@ namespace
         return wd;
     }
 
-    std::string get_cmd(const int argc, char* const argv[])
+    std::string get_cmd(const Settings& settings)
     {
         std::ostringstream oss;
 
-        for (int i = 0; i < argc; ++i)
-        {
-            oss << ' ' << argv[i];
-        }
+        oss << settings.executable_name << 
+            " --count-matrix  " << settings.input.count_matrix_file <<
+            " --genes-length " << settings.input.genes_length_file <<
+            " --transformation " << settings.transformation.type <<
+            " --min-non-null " << settings.transformation.min_non_null <<
+            " --output-file " << settings.output.output_file; 
 
         return oss.str();
     }
 };
 
-ExecutionDescription::ExecutionDescription(const int argc, char* const argv[])
+ExecutionDescription::ExecutionDescription(const Settings& settings)
     : date(get_date()),
     user(get_user()),
     hostname(get_hostname()),
     wd(get_wd()),
-    cmd(get_cmd(argc, argv)),
+    cmd(get_cmd(settings)),
     program_version(__APP_VERSION__)
 {}
 

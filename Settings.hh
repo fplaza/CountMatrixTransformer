@@ -9,6 +9,7 @@
 
 struct Settings
 {
+    std::string executable_name;
 
     struct
     {

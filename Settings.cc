@@ -41,6 +41,7 @@ Settings Settings::parse(int argc, char* argv[])
     all_settings.add(input_settings).add(transformation_settings).add(output_settings).add(misc_settings);
 
     // Retrieve and settingse command line settings
+    settings.executable_name = argv[0];
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, all_settings), vm);
 
