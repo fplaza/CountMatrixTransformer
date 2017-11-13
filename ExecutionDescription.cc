@@ -7,7 +7,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 namespace pt = boost::posix_time;
-#include <unistd.h>
+#include <boost/asio.hpp>
+namespace ip = boost::asio::ip;
 
 namespace
 {
@@ -25,10 +26,7 @@ namespace
 
     std::string get_hostname()
     {
-        char buf[HOST_NAME_MAX];
-        gethostname(buf, HOST_NAME_MAX);
-
-        const std::string& hostname(buf);
+        const std::string& hostname = ip::host_name();
 
         return hostname;
     }
