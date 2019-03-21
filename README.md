@@ -17,7 +17,7 @@ Usage
 ````
 
 * *-c  \<input_count_matrix\>*  count matrix to transform
-* *-l \<genes_length_file\>* file with an header which contains line by line, tab separated pairs of values '\<gene name\> \<gene length\>'
+* *-l \<genes_length_file\>* file (without an header) which contains line by line, tab separated pairs of values '\<gene name\> \<gene length\>'
 * *-t \<transformation_type\>* transformation to apply to the count matrix ('normalize' or 'denormalize')
 * *-o \<transformed_count_matrix\>*  output transformed count matrix
 
@@ -34,7 +34,6 @@ gene_4 10 12 11
 genes length file example
 -------------
 ````
-gene_name gene_length
 gene_1 699
 gene_2 135
 gene_3 1422
