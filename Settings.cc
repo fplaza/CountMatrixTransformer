@@ -21,17 +21,18 @@ Settings Settings::parse(int argc, char* argv[])
 	po::options_description misc_settings("[miscellaneous]");
 
     input_settings.add_options()
-        ("count-matrix,c", po::value<std::string>(&settings.input.count_matrix_file), "count matrix to transform")
-        ("genes-length,l", po::value<std::string>(&settings.input.genes_length_file), "file with an header which contains line by line, tab separated pairs of values '<gene name> <gene length>'")
+        ("count-matrix,c", po::value<std::string>(&settings.input.count_matrix_file)->required(), "count matrix to transform")
+        ("genes-metadata,m", po::value<std::string>(&settings.input.genes_metadata_file)->required(), "file which contains line by line, tab separated values of '<gene_id> <gene name> <gene length>'")
         ;
 
     transformation_settings.add_options()
-        ("transformation,t", po::value<std::string>(&settings.transformation.type), "transformation to apply to the count matrix ('normalize' or 'denormalize')")
-        ("min-non-null,m", po::value<double>(&settings.transformation.min_non_null)->default_value(1), "minimal non null value in raw matrix. (denormalize only)")
+        ("transformation,t", po::value<std::string>(&settings.transformation.type)->required(), "transformation to apply to the count matrix ('coverage', 'normalize' or 'denormalize')")
+        ("min-non-null", po::value<double>(&settings.transformation.min_non_null)->default_value(1), "minimal non null value in raw matrix. (denormalize only)")
+        ("mean-read-length", po::value<unsigned long>(&settings.transformation.mean_read_length)->default_value(80), "mean length of sequencing reads. (coverage only)")
         ;
 
     output_settings.add_options()
-        ("output-file,o", po::value<std::string>(&settings.output.output_file), "transformed count matrix")
+        ("output-file,o", po::value<std::string>(&settings.output.output_file)->required(), "transformed count matrix")
         ;
 
     misc_settings.add_options()
@@ -54,25 +55,11 @@ Settings Settings::parse(int argc, char* argv[])
 
     po::notify(vm);
 
-    // required method is missing in old boost version
-    check_setting_is_set("--count-matrix", settings.input.count_matrix_file);
-    check_setting_is_set("--genes-length", settings.input.genes_length_file);
-    check_setting_is_set("--transformation", settings.transformation.type);
-    check_setting_is_set("--output-file", settings.output.output_file);
-
     check_file_is_readable(settings.input.count_matrix_file);
-    check_file_is_readable(settings.input.genes_length_file);
+    check_file_is_readable(settings.input.genes_metadata_file);
     check_file_is_writable(settings.output.output_file);
 
     return settings;
-}
-
-void Settings::check_setting_is_set(const std::string& val_name, const std::string& value)
-{
-    if (value == "")
-    {
-        throw (std::invalid_argument("error: " + val_name + " setting is missing."));
-    }
 }
 
 void Settings::check_file_is_readable(const std::string& filepath)
@@ -116,11 +103,12 @@ std::ostream& operator<<(std::ostream& os, const Settings& settings)
 
     os << "\n[input]\n";
     os << "--count-matrix = " << settings.input.count_matrix_file << '\n';
-    os << "--genes-length = " << settings.input.genes_length_file << '\n';
+    os << "--genes-metadata = " << settings.input.genes_metadata_file << '\n';
 
     os << "\n[transformation]\n";
     os << "--transformation = " << settings.transformation.type << '\n';
     os << "--min-non-null = " << settings.transformation.min_non_null << '\n';
+    os << "--mean-read-length = " << settings.transformation.mean_read_length << '\n';
 
     os << "\n[output]\n";
     os << "--output-file = " << settings.output.output_file << '\n';

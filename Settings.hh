@@ -14,13 +14,14 @@ struct Settings
     struct
     {
         std::string count_matrix_file;
-        std::string genes_length_file;
+        std::string genes_metadata_file;
     } input;
 
     struct
     {
         std::string type;
         double min_non_null;
+        unsigned long mean_read_length;
     } transformation;
 
     struct

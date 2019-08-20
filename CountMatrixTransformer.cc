@@ -6,14 +6,26 @@
 #include <limits>
 #include <stdexcept>
 
-void CountMatrixNormalizer::transform(Matrix<float>& count_matrix, const std::vector<size_t>& genes_length)
+void CountMatrixCoverage::transform(Matrix<float>& count_matrix, const std::vector<GeneMetadata>& genes_metadata)
+{
+    #pragma omp parallel for
+    for (size_t curr_gene = 0; curr_gene < count_matrix.nrow(); ++curr_gene)
+    {
+        for (size_t curr_sample = 0; curr_sample < count_matrix.ncol(); ++curr_sample)
+        {
+            count_matrix(curr_gene, curr_sample) = (count_matrix(curr_gene, curr_sample) * mean_read_length_) / genes_metadata[curr_gene].length;
+        }
+    }
+}
+
+void CountMatrixNormalizer::transform(Matrix<float>& count_matrix, const std::vector<GeneMetadata>& genes_metadata)
 {
     //Step 1: Calculation of the copy number of each gene
     #pragma omp parallel for
     for (size_t curr_gene = 0; curr_gene < count_matrix.nrow(); ++curr_gene)
     {
         for (size_t curr_sample = 0; curr_sample < count_matrix.ncol(); ++curr_sample)
-            count_matrix(curr_gene, curr_sample) /= genes_length[curr_gene];
+            count_matrix(curr_gene, curr_sample) /= genes_metadata[curr_gene].length;
     }
 
     //Step 2: Calculation of the relative abundance of gene
@@ -46,7 +58,7 @@ void CountMatrixNormalizer::transform(Matrix<float>& count_matrix, const std::ve
     }
 }
 
-void CountMatrixDenormalizer::transform(Matrix<float>& count_matrix, const std::vector<size_t>& genes_length)
+void CountMatrixDenormalizer::transform(Matrix<float>& count_matrix, const std::vector<GeneMetadata>& genes_metadata)
 {
     std::vector<double> samples_coeffs(count_matrix.ncol(), std::numeric_limits<double>::max());
 
@@ -63,7 +75,7 @@ void CountMatrixDenormalizer::transform(Matrix<float>& count_matrix, const std::
                 if(count != 0.0)
                 {
                     samples_coeffs_private[curr_sample] =
-                        std::min(count*genes_length[curr_gene], samples_coeffs_private[curr_sample]);
+                        std::min(count*genes_metadata[curr_gene].length, samples_coeffs_private[curr_sample]);
                 }
             }
         }
@@ -89,7 +101,7 @@ void CountMatrixDenormalizer::transform(Matrix<float>& count_matrix, const std::
         #pragma omp for
         for (size_t curr_gene = 0; curr_gene < count_matrix.nrow(); ++curr_gene)
         {
-            const size_t gene_coeff = genes_length[curr_gene];
+            const size_t gene_coeff = genes_metadata[curr_gene].length;
 
             for (size_t curr_sample = 0; curr_sample < count_matrix.ncol(); ++curr_sample)
             {
@@ -104,9 +116,13 @@ void CountMatrixDenormalizer::transform(Matrix<float>& count_matrix, const std::
 
 
 
-std::auto_ptr<CountMatrixTransformer> CountMatrixTransformerFactory::create_transformer(const std::string& transformation_type, const double min_non_null)
+std::auto_ptr<CountMatrixTransformer> CountMatrixTransformerFactory::create_transformer(const std::string& transformation_type, const double min_non_null, const unsigned long mean_read_length)
 {
-    if (transformation_type.compare(NORMALIZE_TRANSFORMATION_TYPE) == 0)
+    if (transformation_type.compare(COVERAGE_TRANSFORMATION_TYPE) == 0)
+    {
+        return std::auto_ptr<CountMatrixTransformer>(new CountMatrixCoverage(mean_read_length));
+    }
+    else if (transformation_type.compare(NORMALIZE_TRANSFORMATION_TYPE) == 0)
     {
         return std::auto_ptr<CountMatrixTransformer>(new CountMatrixNormalizer());
     }
@@ -120,7 +136,6 @@ std::auto_ptr<CountMatrixTransformer> CountMatrixTransformerFactory::create_tran
     }
 }
 
-
-
+const char CountMatrixTransformerFactory::COVERAGE_TRANSFORMATION_TYPE[] = "coverage";
 const char CountMatrixTransformerFactory::NORMALIZE_TRANSFORMATION_TYPE[] = "normalize";
 const char CountMatrixTransformerFactory::DENORMALIZE_TRANSFORMATION_TYPE[] = "denormalize";

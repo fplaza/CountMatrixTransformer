@@ -45,7 +45,7 @@ namespace
 
         oss << settings.executable_name << 
             " --count-matrix  " << settings.input.count_matrix_file <<
-            " --genes-length " << settings.input.genes_length_file <<
+            " --genes-length " << settings.input.genes_metadata_file <<
             " --transformation " << settings.transformation.type <<
             " --min-non-null " << settings.transformation.min_non_null <<
             " --output-file " << settings.output.output_file; 

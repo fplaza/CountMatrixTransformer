@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include "Settings.hh"
 #include "ExecutionDescription.hh"
-#include "GenesLengthReader.hh"
+#include "GenesMetadataReader.hh"
 #include "MatrixReader.hh"
 #include "CountMatrixTransformer.hh"
 #include "ExecutionDescriptionPrinter.hh"
@@ -36,7 +36,10 @@ int main(int argc, char *argv[])
         const ExecutionDescription execution_description(settings);
 
         std::auto_ptr<CountMatrixTransformer> count_matrix_transformer =
-            CountMatrixTransformerFactory::create_transformer(settings.transformation.type, settings.transformation.min_non_null);
+            CountMatrixTransformerFactory::create_transformer(
+                    settings.transformation.type,
+                    settings.transformation.min_non_null,
+                    settings.transformation.mean_read_length);
 
         std::cout << "Reading count matrix..." << std::endl;
         time_profiler.start_new_timer("Reading count matrix");
@@ -45,16 +48,16 @@ int main(int argc, char *argv[])
         time_profiler.stop_last_timer();
         std::cout << "\rDone. Count matrix has " << count_matrix.ncol() << " samples and " << count_matrix.nrow() << " genes.\n" << std::endl;
 
-        std::cout << "Reading genes length..." << std::endl;
-        time_profiler.start_new_timer("Computing genes length");
-        const std::vector<size_t>& genes_length = 
-            GenesLengthReader::read(settings.input.genes_length_file, count_matrix);
+        std::cout << "Reading genes metadata..." << std::endl;
+        time_profiler.start_new_timer("Computing genes metadata");
+        const std::vector<GeneMetadata> genes_metadata = 
+            GenesMetadataReader::read(settings.input.genes_metadata_file, count_matrix.nrow());
         time_profiler.stop_last_timer();
         std::cout << "Done.\n" << std::endl;
 
         std::cout << "Transforming count matrix..." << std::endl;
         time_profiler.start_new_timer("Transforming count matrix");
-        count_matrix_transformer->transform(count_matrix, genes_length);
+        count_matrix_transformer->transform(count_matrix, genes_metadata);
         time_profiler.stop_last_timer();
         std::cout << "Done\n" << std::endl;
 
