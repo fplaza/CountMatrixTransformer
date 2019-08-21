@@ -63,7 +63,10 @@ int main(int argc, char *argv[])
 
         std::cout << "Writing transformed count matrix..." << std::endl;
         time_profiler.start_new_timer("Writing transformed count matrix");
-        ExecutionDescriptionPrinter::print(execution_description, settings.output.output_file);
+        if (settings.output.with_header)
+        {
+            ExecutionDescriptionPrinter::print(execution_description, settings.output.output_file);
+        }
         MatrixPrinter<float>::print(count_matrix, settings.output.output_file);
         time_profiler.stop_last_timer();
         std::cout << "\rDone         \n" << std::endl;

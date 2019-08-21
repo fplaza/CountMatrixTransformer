@@ -33,6 +33,7 @@ Settings Settings::parse(int argc, char* argv[])
 
     output_settings.add_options()
         ("output-file,o", po::value<std::string>(&settings.output.output_file)->required(), "transformed count matrix")
+        ("with-header", po::bool_switch(&settings.output.with_header), "add header in transformed count matrix for traceability purposes.")
         ;
 
     misc_settings.add_options()
@@ -112,6 +113,7 @@ std::ostream& operator<<(std::ostream& os, const Settings& settings)
 
     os << "\n[output]\n";
     os << "--output-file = " << settings.output.output_file << '\n';
+    os << "--with-header = " << std::boolalpha << settings.output.with_header << '\n';
     os << sep;
 
 	return os;

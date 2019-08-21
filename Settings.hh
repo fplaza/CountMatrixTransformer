@@ -27,6 +27,7 @@ struct Settings
     struct
     {
         std::string output_file;
+        bool with_header;
     } output;
 
     static Settings parse(int argc, char* argv[]);
